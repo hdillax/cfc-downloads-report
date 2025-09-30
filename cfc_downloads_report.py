@@ -3,6 +3,7 @@ import streamlit as st
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+from urllib.parse import quote
 from fpdf import FPDF
 from fpdf.enums import Align
 from datetime import datetime, timezone, timedelta
@@ -326,6 +327,7 @@ if st.session_state.orders:
 
     st.markdown("---")
     st.button("Nova Consulta", on_click=reset_search)
+
 
 
 
