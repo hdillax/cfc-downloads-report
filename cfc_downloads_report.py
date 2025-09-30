@@ -199,9 +199,44 @@ def generate_pdf_bytes(order: Dict[str, Any], downloads: List[Dict[str, Any]], o
 # --- Interface do Aplicativo Web com Streamlit ---
 st.set_page_config(page_title="Downloads Report", layout="centered",page_icon="🦉")
 # Manifest mínimo só para o atalho no Android usar a corujinha
+# força o ícone da corujinha no atalho/instalação (Chrome Android)
 st.markdown("""
-<link rel="manifest" href='data:application/manifest+json,%7B%7D'>
-<link rel="apple-touch-icon" sizes="192x192" href="https://fonts.gstatic.com/s/e/notoemoji/latest/1f989/512.png">
+<script>
+(function() {
+  const OWL = "https://fonts.gstatic.com/s/e/notoemoji/latest/1f989/512.png";
+
+  // Remove qualquer manifest existente (o do Streamlit)
+  document.querySelectorAll('link[rel="manifest"]').forEach(el => el.remove());
+
+  // Cria um manifest mínimo com a corujinha
+  const manifest = {
+    name: "Relatórios CFC",
+    short_name: "CFC",
+    start_url: ".",
+    display: "standalone",     // pode trocar para "browser" se preferir abrir com barra de endereço
+    background_color: "#111111",
+    theme_color: "#111111",
+    icons: [
+      { src: OWL, sizes: "192x192", type: "image/png", purpose: "maskable any" },
+      { src: OWL, sizes: "512x512", type: "image/png", purpose: "maskable any" }
+    ]
+  };
+
+  // Injeta como blob (isso o Chrome aceita)
+  const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("link");
+  link.rel = "manifest";
+  link.href = url;
+  document.head.appendChild(link);
+
+  // Opcional: também adiciona apple-touch-icon (inofensivo no Android)
+  const apple = document.createElement("link");
+  apple.rel = "apple-touch-icon";
+  apple.href = OWL;
+  document.head.appendChild(apple);
+})();
+</script>
 """, unsafe_allow_html=True)
 st.subheader("🦉 Downloads Report")
 
@@ -274,6 +309,7 @@ if st.session_state.orders:
 
     st.markdown("---")
     st.button("Nova Consulta", on_click=reset_search)
+
 
 
 
