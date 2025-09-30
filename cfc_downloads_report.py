@@ -1,5 +1,4 @@
-# sendowl_downloads_report.py
-# App Streamlit — Relatório de downloads (SendOwl)
+# Relatório de downloads
 # Versão: 2025-09-30 — Correções e robustez:
 # - PDF: retorna sempre 'bytes' (st.download_button aceita bytes/str/file-like)
 # - Sanitize de texto Latin-1 seguro (core fonts do FPDF não são unicode)
@@ -361,3 +360,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
