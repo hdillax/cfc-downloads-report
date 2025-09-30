@@ -198,7 +198,7 @@ def generate_pdf_bytes(order: Dict[str, Any], downloads: List[Dict[str, Any]], o
 
 # --- Interface do Aplicativo Web com Streamlit ---
 st.set_page_config(page_title="Downloads Report | SendOwl", layout="centered")
-st.title("📝 Relatórios de Download SendOwl")
+st.subheader("📝 Downloads Report | SendOwl")
 
 if "orders" not in st.session_state:
     st.session_state.orders = []
@@ -269,3 +269,4 @@ if st.session_state.orders:
 
     st.markdown("---")
     st.button("Nova Consulta", on_click=reset_search)
+
