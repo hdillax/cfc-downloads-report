@@ -30,7 +30,7 @@ def sanitize_text(text: str) -> str:
     return text.encode("latin-1", "replace").decode("latin-1")
 
 # --- Funções de Lógica de Negócio ---
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def _get(path: str, params: Dict[str, Any] | None = None) -> Any:
     r = session.get(
         f"{BASE_URL}{path}",
@@ -65,7 +65,7 @@ def _normalize_orders(p: Any) -> List[Dict[str, Any]]:
 def search_orders(email: str) -> List[Dict[str, Any]]:
     return _normalize_orders(_get("/orders/search", params={"email": email}))
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def get_order_details(order_id: int) -> Dict[str, Any]:
     return _get(f"/orders/{order_id}")["order"]
 
@@ -197,8 +197,8 @@ def generate_pdf_bytes(order: Dict[str, Any], downloads: List[Dict[str, Any]], o
         return bytes(out)
 
 # --- Interface do Aplicativo Web com Streamlit ---
-st.set_page_config(page_title="Gerador de Relatórios SendOwl", layout="centered")
-st.title("🦉 Gerador de Relatórios SendOwl")
+st.set_page_config(page_title="Downloads Report | SendOwl", layout="centered")
+st.title("📝 Relatórios de Download SendOwl")
 
 if "orders" not in st.session_state:
     st.session_state.orders = []
@@ -210,8 +210,8 @@ def reset_search():
     st.session_state.email = ""
 
 with st.form(key="search_form"):
-    email_input = st.text_input("E-mail do Comprador", value=st.session_state.email)
-    submit_button = st.form_submit_button(label="Buscar Pedidos")
+    email_input = st.text_input("E-mail", value=st.session_state.email)
+    submit_button = st.form_submit_button(label="Buscar")
 
 if submit_button:
     if not email_input or "@" not in email_input:
@@ -230,7 +230,11 @@ if st.session_state.orders:
     st.markdown("---")
     st.subheader(f"Pedidos encontrados para: {st.session_state.email}")
 
-    for order in st.session_state.orders:
+    for i, order in enumerate(st.session_state.orders):
+        # separador entre os cards (não antes do primeiro)
+        if i > 0:
+            st.markdown("---")   # ou: st.divider()
+
         order_id = order["id"]
         order_name = order.get("order_name", f"#{order_id}")
         order_date = _fmt(order.get("created_at", "")).split(" ")[0]
