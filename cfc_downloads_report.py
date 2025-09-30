@@ -3,75 +3,11 @@ import streamlit as st
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from urllib.parse import quote
 from fpdf import FPDF
 from fpdf.enums import Align
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List
 import os
-
-# --- PWA SETTINGS ---
-APP_NAME = "Downloads Report"
-APP_ICON = "🦉"  # An emoji, which we'll turn into an SVG icon
-
-# 1. Create the SVG icon from the emoji
-svg_icon = f"""
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-    <text y=".9em" font-size="90">{APP_ICON}</text>
-</svg>
-"""
-# URL-encode the SVG
-encoded_svg_icon = "data:image/svg+xml," + quote(svg_icon)
-
-# 2. Create the manifest as a Python dictionary
-manifest = {
-    "name": APP_NAME,
-    "short_name": APP_NAME,
-    "icons": [
-        {
-            "src": encoded_svg_icon,
-            "sizes": "192x192",
-            "type": "image/svg+xml",
-        }
-    ],
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
-    "start_url": ".",
-    "display": "standalone",
-    "scope": "/",
-}
-
-# 3. Create the minimal service worker script
-service_worker = """
-self.addEventListener('fetch', function(event) {});
-"""
-
-# --- 4. Generate the HTML to inject ---
-
-# First, convert the manifest dictionary to a URL-safe string
-manifest_json_string = json.dumps(manifest)
-encoded_manifest = quote(manifest_json_string)
-
-# Then, use that variable in the f-string
-pwa_html = f"""
-    <link rel="manifest" href="data:application/manifest+json,{encoded_manifest}">
-    <script>
-        var sw_content = `{service_worker}`;
-        var sw_blob = new Blob([sw_content], {{type: 'application/javascript'}});
-        var sw_url = URL.createObjectURL(sw_blob);
-
-        if ('serviceWorker' in navigator) {{
-            navigator.serviceWorker.register(sw_url).then(function(reg) {{
-                console.log('Service Worker registered.', reg);
-            }}).catch(function(err) {{
-                console.log('Service Worker registration failed:', err);
-            }});
-        }}
-    </script>
-"""
-
-# --- INJECT PWA HTML ---
-st.html(pwa_html)
 
 # --- Suas chaves/secrets devem ser configuradas no Streamlit Cloud ---
 KEY = st.secrets["SENDOWL_KEY"]
@@ -333,6 +269,7 @@ if st.session_state.orders:
 
     st.markdown("---")
     st.button("Nova Consulta", on_click=reset_search)
+
 
 
 
