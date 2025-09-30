@@ -9,6 +9,63 @@ from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List
 import os
 
+# --- PWA SETTINGS ---
+APP_NAME = "Downloads Report"
+APP_ICON = "🦉"  # An emoji, which we'll turn into an SVG icon
+
+# 1. Create the SVG icon from the emoji
+svg_icon = f"""
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <text y=".9em" font-size="90">{APP_ICON}</text>
+</svg>
+"""
+# URL-encode the SVG
+encoded_svg_icon = "data:image/svg+xml," + quote(svg_icon)
+
+# 2. Create the manifest as a Python dictionary
+manifest = {
+    "name": APP_NAME,
+    "short_name": APP_NAME,
+    "icons": [
+        {
+            "src": encoded_svg_icon,
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+        }
+    ],
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff",
+    "start_url": ".",
+    "display": "standalone",
+    "scope": "/",
+}
+
+# 3. Create the minimal service worker script
+service_worker = """
+self.addEventListener('fetch', function(event) {});
+"""
+
+# 4. Generate the HTML to inject
+pwa_html = f"""
+    <link rel="manifest" href="data:application/manifest+json,{quote(json.dumps(manifest))}">
+    <script>
+        var sw_content = `{service_worker}`;
+        var sw_blob = new Blob([sw_content], {{type: 'application/javascript'}});
+        var sw_url = URL.createObjectURL(sw_blob);
+
+        if ('serviceWorker' in navigator) {{
+            navigator.serviceWorker.register(sw_url).then(function(reg) {{
+                console.log('Service Worker registered.', reg);
+            }}).catch(function(err) {{
+                console.log('Service Worker registration failed:', err);
+            }});
+        }}
+    </script>
+"""
+
+# --- INJECT PWA HTML ---
+st.html(pwa_html)
+
 # --- Suas chaves/secrets devem ser configuradas no Streamlit Cloud ---
 KEY = st.secrets["SENDOWL_KEY"]
 SECRET = st.secrets["SENDOWL_SECRET"]
@@ -197,41 +254,7 @@ def generate_pdf_bytes(order: Dict[str, Any], downloads: List[Dict[str, Any]], o
         return bytes(out)
 
 # --- Interface do Aplicativo Web com Streamlit ---
-st.set_page_config(page_title="Downloads Report", layout="centered",page_icon="🦉")
-# muda apenas o NOME do app instalado no Android/Chrome
-st.markdown("""
-<script>
-(async () => {
-  const NEW_NAME = "Relatórios CFC";
-  const NEW_SHORT = "Relatórios CFC";
-
-  const orig = document.querySelector('link[rel="manifest"]');
-  if (!orig) return;
-
-  try {
-    const res = await fetch(orig.href);
-    const mf = await res.json();
-
-    // altera só o nome/short_name; mantém ícones, cores, etc.
-    mf.name = NEW_NAME;
-    mf.short_name = NEW_SHORT;
-
-    const blob = new Blob([JSON.stringify(mf)], { type: "application/manifest+json" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("link");
-    link.rel = "manifest";
-    link.href = url;
-
-    // remove o manifest original e injeta o novo
-    orig.remove();
-    document.head.appendChild(link);
-  } catch (e) {
-    console.warn("Falha ao sobrescrever manifest:", e);
-  }
-})();
-</script>
-""", unsafe_allow_html=True)
+st.set_page_config(page_title="Downloads Report", layout="centered",page_icon="🦉", initial_sidebar_state="collapsed")
 st.subheader("🦉 Downloads Report")
 
 if "orders" not in st.session_state:
@@ -303,6 +326,7 @@ if st.session_state.orders:
 
     st.markdown("---")
     st.button("Nova Consulta", on_click=reset_search)
+
 
 
 
