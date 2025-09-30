@@ -46,9 +46,15 @@ service_worker = """
 self.addEventListener('fetch', function(event) {});
 """
 
-# 4. Generate the HTML to inject
+# --- 4. Generate the HTML to inject ---
+
+# First, convert the manifest dictionary to a URL-safe string
+manifest_json_string = json.dumps(manifest)
+encoded_manifest = quote(manifest_json_string)
+
+# Then, use that variable in the f-string
 pwa_html = f"""
-    <link rel="manifest" href="data:application/manifest+json,{quote(json.dumps(manifest))}">
+    <link rel="manifest" href="data:application/manifest+json,{encoded_manifest}">
     <script>
         var sw_content = `{service_worker}`;
         var sw_blob = new Blob([sw_content], {{type: 'application/javascript'}});
@@ -327,6 +333,7 @@ if st.session_state.orders:
 
     st.markdown("---")
     st.button("Nova Consulta", on_click=reset_search)
+
 
 
 
