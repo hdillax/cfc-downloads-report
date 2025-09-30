@@ -198,6 +198,10 @@ def generate_pdf_bytes(order: Dict[str, Any], downloads: List[Dict[str, Any]], o
 
 # --- Interface do Aplicativo Web com Streamlit ---
 st.set_page_config(page_title="Downloads Report", layout="centered",page_icon="🦉")
+# Manifest mínimo só para o atalho no Android usar a corujinha
+st.markdown("""
+<link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22Relat%C3%B3rios%20CFC%22%2C%22short_name%22%3A%22CFC%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22browser%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Ffonts.gstatic.com%2Fs%2Fe%2Fnotoemoji%2Flatest%2F1f989%2F512.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Ffonts.gstatic.com%2Fs%2Fe%2Fnotoemoji%2Flatest%2F1f989%2F512.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22maskable%20any%22%7D%5D%7D'>
+""", unsafe_allow_html=True)
 st.subheader("🦉 Downloads Report")
 
 if "orders" not in st.session_state:
@@ -269,5 +273,6 @@ if st.session_state.orders:
 
     st.markdown("---")
     st.button("Nova Consulta", on_click=reset_search)
+
 
 
